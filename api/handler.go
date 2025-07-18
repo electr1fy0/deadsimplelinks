@@ -1,9 +1,10 @@
-package main
+package handler
 
 import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -19,6 +20,29 @@ type Bookmark struct {
 
 type BookmarkStore struct {
 	DB *sql.DB
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	db, err := connectDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	store := &BookmarkStore{DB: db}
+
+	bookmarks, err := store.GetAll()
+	if err != nil {
+		log.Fatal("fetch failed:", err)
+	}
+
+	fmt.Println("Bookmarks:")
+	for _, b := range bookmarks {
+		fmt.Fprintf(w, "%d | %s | %s | %s\n", b.ID, b.Title, b.URL, b.CreatedAt.Format("2006-01-02"))
+	}
+
+	// fmt.Fprint(w, "meow")
+
 }
 
 func (store *BookmarkStore) GetAll() ([]Bookmark, error) {
@@ -50,24 +74,4 @@ func connectDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("ping failed: %w", err)
 	}
 	return db, nil
-}
-
-func main() {
-	db, err := connectDB()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	store := &BookmarkStore{DB: db}
-
-	bookmarks, err := store.GetAll()
-	if err != nil {
-		log.Fatal("fetch failed:", err)
-	}
-
-	fmt.Println("Bookmarks:")
-	for _, b := range bookmarks {
-		fmt.Printf("%d | %s | %s | %s\n", b.ID, b.Title, b.URL, b.CreatedAt.Format("2006-01-02"))
-	}
 }
