@@ -13,7 +13,7 @@ const BookmarkApp = () => {
   useEffect(() => {
     if (!token) return;
     setBookmarks(null);
-    fetch(`/api/bookmarks_get?token=${token}`)
+    fetch(`/api/bookmarks_get/main?token=${token}`)
       .then((res) => res.ok && res.json())
       .then((data) => data && setBookmarks(data))
       .catch(() => {
@@ -31,7 +31,7 @@ const BookmarkApp = () => {
 
     setLoggingIn(true);
 
-    const res = await fetch(`/api/login`, {
+    const res = await fetch(`/api/login/main`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: loginInput }),
@@ -65,7 +65,7 @@ const BookmarkApp = () => {
     const toPost = newBookmark;
     setNewBookmark("");
 
-    fetch(`/api/bookmarks_post`, {
+    fetch(`/api/bookmarks_post/main`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, url: toPost }),
